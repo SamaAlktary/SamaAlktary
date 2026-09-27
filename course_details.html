@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ course.name }} - تفاصيل المساق</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Tahoma, sans-serif;
+            background: #f5f7fa;
+            color: #222;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+
+        /* زر العودة */
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 18px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        /* معلومات المساق */
+
+        .course-header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .course-header h1 {
+            margin-top: 0;
+            color: #1d3557;
+            font-size: 32px;
+        }
+
+        .course-code {
+            display: inline-block;
+            background: #1d3557;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .course-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .info-box {
+            background: #f1f5f9;
+            padding: 18px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .info-box .label {
+            display: block;
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-box .value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1d3557;
+        }
+
+        /* عنوان الموارد */
+
+        .resources-title {
+            margin: 30px 0 20px;
+            color: #1d3557;
+        }
+
+        /* البطاقات */
+
+        .resources-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .resource-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+            text-align: center;
+            width: 100%;
+        }
+
+        .resource-card:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .resource-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .resource-card h3 {
+            color: #0f172a;
+            font-size: 1.15rem;
+            margin: 10px 0 15px;
+        }
+
+        .resource-card p {
+            color: #1d3557;
+            margin: 8px 0 15px;
+            min-height: 0;
+            font-weight: 600;
+        }
+
+        /* قائمة الموارد */
+
+        .resource-list {
+            margin-top: 10px;
+            text-align: right;
+        }
+
+        .resource-item {
+            background: #eaf2ff;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border: 1px solid #cbdcff;
+        }
+
+        .resource-item a {
+            color: #1d3557;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .resource-item a:hover {
+            color: #2563eb;
+        }
+
+        /* الموارد الإضافية مخفية */
+
+        .extra-resource {
+            display: none;
+        }
+
+        /* زر عرض المزيد */
+
+        .more-resources {
+            display: block;
+            width: fit-content;
+            margin: 6px auto 8px;
+            padding: 4px 12px;
+            background: transparent;
+            color: #2563eb;
+            border: none;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .more-resources:hover {
+            background: transparent;
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        /* لا يوجد موارد */
+
+        .empty-resource {
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* الهاتف */
+
+        @media (max-width: 700px) {
+
+            .container {
+                width: 94%;
+                margin: 20px auto;
+            }
+
+            .course-info {
+                grid-template-columns: 1fr;
+            }
+
+            .course-header h1 {
+                font-size: 26px;
+            }
+
+            .resource-card {
+                padding: 15px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- زر العودة -->
+
+    <a href="javascript:history.back()" class="back-btn">
+        ← العودة
+    </a>
+
+
+    <!-- =========================================
+         معلومات المساق
+         ========================================= -->
+
+    <div class="course-header">
+
+        <h1>
+            {{ course.name }}
+        </h1>
+
+        <span class="course-code">
+            {{ course.code }}
+        </span>
+
+        <div class="course-info">
+
+            <div class="info-box">
+                <span class="label">
+                    الساعات المعتمدة
+                </span>
+
+                <span class="value">
+                    {{ course.hours }}
+                </span>
+            </div>
+
+            <div class="info-box">
+                <span class="label">
+                    السنة
+                </span>
+
+                <span class="value">
+                    {{ course.year }}
+                </span>
+            </div>
+
+            <div class="info-box">
+                <span class="label">
+                    الفصل
+                </span>
+
+                <span class="value">
+                    {{ course.semester }}
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         موارد المساق
+         ========================================= -->
+
+    <h2 class="resources-title">
+        📚 موارد المساق
+    </h2>
+
+
+    <div class="resources-grid">
+
+
+        <!-- =====================================
+             الكتب
+             ===================================== -->
+
+        <div class="resource-card">
+
+            <div class="resource-icon">
+                📚
+            </div>
+
+            <h3>
+                الكتب
+            </h3>
+
+            <p>
+                الكتب والمراجع الخاصة بالمساق
+            </p>
+
+            {% set books = resources
+                | selectattr('resource_type', 'equalto', 'book')
+                | list
+            %}
+
+
+            {% if books %}
+
+                <div class="resource-list">
+
+                    {% for resource in books %}
+
+                        <div class="resource-item {% if loop.index > 1 %}extra-resource books-extra{% endif %}">
+
+                            {% if resource.url %}
+
+                                <a href="{{ resource.url }}" target="_blank">
+                                    {{ resource.title or 'فتح الكتاب' }}
+                                </a>
+
+                            {% elif resource.file_path %}
+
+                                <a href="{{ resource.file_path }}" target="_blank">
+                                    {{ resource.title or 'فتح الكتاب' }}
+                                </a>
+
+                            {% else %}
+
+                                {{ resource.title or 'كتاب' }}
+
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+
+                    {% if books|length > 1 %}
+
+                        <div class="more-resources"
+                             onclick="toggleResources('books-extra', this)">
+
+                            اضغط لعرض المزيد
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-resource">
+                    لا يوجد كتب مضافة حالياً
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- =====================================
+             السلايدات
+             ===================================== -->
+
+        <div class="resource-card">
+
+            <div class="resource-icon">
+                📊
+            </div>
+
+            <h3>
+                السلايدات
+            </h3>
+
+            <p>
+                عروض ومحاضرات السلايدات الخاصة بالمساق
+            </p>
+
+            {% set slides = resources
+                | selectattr('resource_type', 'equalto', 'slides')
+                | list
+            %}
+
+
+            {% if slides %}
+
+                <div class="resource-list">
+
+                    {% for resource in slides %}
+
+                        <div class="resource-item {% if loop.index > 1 %}extra-resource slides-extra{% endif %}">
+
+                            {% if resource.url %}
+
+                                <a href="{{ resource.url }}" target="_blank">
+                                    {{ resource.title or 'فتح السلايدات' }}
+                                </a>
+
+                            {% elif resource.file_path %}
+
+                                <a href="{{ resource.file_path }}" target="_blank">
+                                    {{ resource.title or 'فتح السلايدات' }}
+                                </a>
+
+                            {% else %}
+
+                                {{ resource.title or 'سلايدات' }}
+
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+
+                    {% if slides|length > 1 %}
+
+                        <div class="more-resources"
+                             onclick="toggleResources('slides-extra', this)">
+
+                            اضغط لعرض المزيد
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-resource">
+                    لا يوجد سلايدات مضافة حالياً
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- =====================================
+             المحاضرات
+             ===================================== -->
+
+        <div class="resource-card">
+
+            <div class="resource-icon">
+                🎥
+            </div>
+
+            <h3>
+                المحاضرات
+            </h3>
+
+            <p>
+                فيديوهات وروابط المحاضرات
+            </p>
+
+            {% set lectures = resources
+                | selectattr('resource_type', 'equalto', 'lecture')
+                | list
+            %}
+
+
+            {% if lectures %}
+
+                <div class="resource-list">
+
+                    {% for resource in lectures %}
+
+                        <div class="resource-item {% if loop.index > 1 %}extra-resource lectures-extra{% endif %}">
+
+                            {% if resource.url %}
+
+                                <a href="{{ resource.url }}" target="_blank">
+                                    {{ resource.title or 'مشاهدة المحاضرة' }}
+                                </a>
+
+                            {% elif resource.file_path %}
+
+                                <a href="{{ resource.file_path }}" target="_blank">
+                                    {{ resource.title or 'مشاهدة المحاضرة' }}
+                                </a>
+
+                            {% else %}
+
+                                {{ resource.title or 'محاضرة' }}
+
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+
+                    {% if lectures|length > 1 %}
+
+                        <div class="more-resources"
+                             onclick="toggleResources('lectures-extra', this)">
+
+                            اضغط لعرض المزيد
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-resource">
+                    لا يوجد محاضرات مضافة حالياً
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- =====================================
+             التلخيصات
+             ===================================== -->
+
+        <div class="resource-card">
+
+            <div class="resource-icon">
+                📝
+            </div>
+
+            <h3>
+                التلخيصات
+            </h3>
+
+            <p>
+                تلخيصات وملاحظات المساق
+            </p>
+
+            {% set summaries = resources
+                | selectattr('resource_type', 'equalto', 'summary')
+                | list
+            %}
+
+
+            {% if summaries %}
+
+                <div class="resource-list">
+
+                    {% for resource in summaries %}
+
+                        <div class="resource-item {% if loop.index > 1 %}extra-resource summaries-extra{% endif %}">
+
+                            {% if resource.url %}
+
+                                <a href="{{ resource.url }}" target="_blank">
+                                    {{ resource.title or 'فتح التلخيص' }}
+                                </a>
+
+                            {% elif resource.file_path %}
+
+                                <a href="{{ resource.file_path }}" target="_blank">
+                                    {{ resource.title or 'فتح التلخيص' }}
+                                </a>
+
+                            {% else %}
+
+                                {{ resource.title or 'تلخيص' }}
+
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+
+                    {% if summaries|length > 1 %}
+
+                        <div class="more-resources"
+                             onclick="toggleResources('summaries-extra', this)">
+
+                            اضغط لعرض المزيد
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-resource">
+                    لا يوجد تلخيصات مضافة حالياً
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- =====================================
+             الاختبارات السابقة
+             ===================================== -->
+
+        <div class="resource-card">
+
+            <div class="resource-icon">
+                📝
+            </div>
+
+            <h3>
+                اختبارات سابقة
+            </h3>
+
+            <p>
+                اختبارات سابقة وأسئلة للمراجعة
+            </p>
+
+            {% set exams = resources
+                | selectattr('resource_type', 'equalto', 'exam')
+                | list
+            %}
+
+
+            {% if exams %}
+
+                <div class="resource-list">
+
+                    {% for resource in exams %}
+
+                        <div class="resource-item {% if loop.index > 1 %}extra-resource exams-extra{% endif %}">
+
+                            {% if resource.url %}
+
+                                <a href="{{ resource.url }}" target="_blank">
+                                    {{ resource.title or 'فتح الاختبار' }}
+                                </a>
+
+                            {% elif resource.file_path %}
+
+                                <a href="{{ resource.file_path }}" target="_blank">
+                                    {{ resource.title or 'فتح الاختبار' }}
+                                </a>
+
+                            {% else %}
+
+                                {{ resource.title or 'اختبار سابق' }}
+
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+
+                    {% if exams|length > 1 %}
+
+                        <div class="more-resources"
+                             onclick="toggleResources('exams-extra', this)">
+
+                            اضغط لعرض المزيد
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-resource">
+                    لا يوجد اختبارات سابقة مضافة حالياً
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     JavaScript
+     ========================================= -->
+
+<script>
+
+function toggleResources(className, button) {
+
+    const items = document.querySelectorAll('.' + className);
+
+    if (!items.length) {
+        return;
+    }
+
+    const hidden =
+        getComputedStyle(items[0]).display === 'none';
+
+
+    items.forEach(function(item) {
+
+        item.style.display = hidden
+            ? 'block'
+            : 'none';
+
+    });
+
+
+    button.textContent = hidden
+        ? 'إخفاء الموارد'
+        : 'اضغط لعرض المزيد';
+}
+
+</script>
+
+</body>
+
+</html>

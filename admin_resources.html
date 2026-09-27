@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>إدارة الموارد</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .resources-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .resources-header,
+        .resource-form {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .resources-header h1 {
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            display: inline-block;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+
+        .resources-list {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .resource-item {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .resource-item h3 {
+            margin-top: 0;
+        }
+
+        .edit-btn {
+            display: inline-block;
+            background: #f59e0b;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 7px;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+
+        .delete-btn {
+            display: inline-block;
+            background: #dc2626;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 7px;
+            text-decoration: none;
+            margin-top: 10px;
+            margin-right: 5px;
+        }
+
+        .resource-filter {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .resource-filter h2 {
+            margin-top: 0;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .filter-btn,
+        .clear-filter-btn {
+            display: inline-block;
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            margin-top: 5px;
+        }
+
+        .filter-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .clear-filter-btn {
+            background: #6b7280;
+            color: white;
+            margin-right: 5px;
+        }
+
+        /* بحث المساقات */
+
+        .course-search {
+            margin-bottom: 10px;
+        }
+
+        .course-search input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 15px;
+        }
+
+        .no-courses-found {
+            display: none;
+            color: #999;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="resources-container">
+
+    <div class="resources-header">
+        <h1>📚 إدارة الموارد</h1>
+
+        <p>
+            من هنا يمكنك إضافة الكتب والمحاضرات والسلايدات والملخصات
+            والاختبارات السابقة للمساقات.
+        </p>
+    </div>
+
+
+    <!-- =========================================
+         البحث والفلترة
+         ========================================= -->
+
+    <div class="resource-filter">
+
+        <h2>🔎 البحث والفلترة</h2>
+
+        <form method="GET">
+
+            <div class="filter-group">
+
+                <label for="search">
+                    البحث
+                </label>
+
+                <input
+                    type="text"
+                    id="search"
+                    name="search"
+                    value="{{ search or '' }}"
+                    placeholder="ابحث باسم المورد أو المساق أو رمز المساق..."
+                >
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <label for="resource_type">
+                    نوع المورد
+                </label>
+
+                <select
+                    id="resource_type"
+                    name="resource_type"
+                >
+
+                    <option value="">
+                        جميع الأنواع
+                    </option>
+
+                    <option
+                        value="book"
+                        {% if resource_type_filter == 'book' %}selected{% endif %}
+                    >
+                        📖 كتاب
+                    </option>
+
+                    <option
+                        value="slides"
+                        {% if resource_type_filter == 'slides' %}selected{% endif %}
+                    >
+                        📊 سلايدات
+                    </option>
+
+                    <option
+                        value="lecture"
+                        {% if resource_type_filter == 'lecture' %}selected{% endif %}
+                    >
+                        🎥 محاضرة
+                    </option>
+
+                    <option
+                        value="summary"
+                        {% if resource_type_filter == 'summary' %}selected{% endif %}
+                    >
+                        📝 ملخص
+                    </option>
+
+                    <option
+                        value="exam"
+                        {% if resource_type_filter == 'exam' %}selected{% endif %}
+                    >
+                        📝 اختبار سابق
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="filter-btn"
+            >
+                🔎 بحث
+            </button>
+
+
+            <a
+                href="{{ url_for('admin_resources') }}"
+                class="clear-filter-btn"
+            >
+                🔄 إلغاء الفلترة
+            </a>
+
+        </form>
+
+    </div>
+
+
+    <!-- =========================================
+         إضافة مورد جديد
+         ========================================= -->
+
+    <div class="resource-form">
+
+        <h2>➕ إضافة مورد جديد</h2>
+
+        <form method="POST">
+
+            <!-- اختيار المساق -->
+
+            <div class="form-group">
+
+                <label for="course_search">
+                    🔎 البحث عن المساق
+                </label>
+
+                <div class="course-search">
+
+                    <input
+                        type="text"
+                        id="course_search"
+                        placeholder="اكتب اسم المساق أو رمز المساق..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+                <label for="course_id">
+                    المساق
+                </label>
+
+                <select
+                    id="course_id"
+                    name="course_id"
+                    required
+                >
+
+                    <option value="">
+                        اختر المساق
+                    </option>
+
+                    {% for course in courses %}
+
+                    <option
+                        value="{{ course.id }}"
+                        data-course-search="{{ course.name }} {{ course.code }}"
+                    >
+                        {{ course.name }} - {{ course.code }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <div
+                    id="no-courses-found"
+                    class="no-courses-found"
+                >
+                    لا يوجد مساقات مطابقة للبحث.
+                </div>
+
+            </div>
+
+
+            <!-- نوع المورد -->
+
+            <div class="form-group">
+
+                <label for="resource_type">
+                    نوع المورد
+                </label>
+
+                <select
+                    id="resource_type"
+                    name="resource_type"
+                    required
+                >
+
+                    <option value="">
+                        اختر نوع المورد
+                    </option>
+
+                    <option value="book">
+                        📖 كتاب
+                    </option>
+
+                    <option value="slides">
+                        📊 سلايدات
+                    </option>
+
+                    <option value="lecture">
+                        🎥 محاضرة
+                    </option>
+
+                    <option value="summary">
+                        📝 ملخص
+                    </option>
+
+                    <option value="exam">
+                        📝 اختبار سابق
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- عنوان المورد -->
+
+            <div class="form-group">
+
+                <label for="title">
+                    عنوان المورد
+                </label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    placeholder="مثال: كتاب مهارات الاتصال"
+                    required
+                >
+
+            </div>
+
+
+            <!-- رابط المورد -->
+
+            <div class="form-group">
+
+                <label for="url">
+                    رابط المورد
+                </label>
+
+                <input
+                    type="url"
+                    id="url"
+                    name="url"
+                    placeholder="https://drive.google.com/..."
+                    required
+                >
+
+            </div>
+
+
+            <!-- الوصف -->
+
+            <div class="form-group">
+
+                <label for="description">
+                    الوصف
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    placeholder="اكتب وصفًا مختصرًا للمورد..."
+                ></textarea>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="submit-btn"
+            >
+                ➕ إضافة المورد
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- =========================================
+         الموارد الموجودة
+         ========================================= -->
+
+    <div class="resources-list">
+
+        <h2>📋 الموارد الموجودة</h2>
+
+        {% if resources %}
+
+            {% for resource in resources %}
+
+            <div class="resource-item">
+
+                <h3>
+                    {{ resource.title }}
+                </h3>
+
+                <p>
+                    <strong>المساق:</strong>
+                    {{ resource.course_name }} - {{ resource.course_code }}
+                </p>
+
+                <p>
+                    <strong>النوع:</strong>
+                    {{ resource.resource_type }}
+                </p>
+
+                <p>
+                    <strong>الرابط:</strong>
+
+                    <a
+                        href="{{ resource.url }}"
+                        target="_blank"
+                    >
+                        فتح المورد
+                    </a>
+
+                </p>
+
+                <a
+                    href="{{ url_for('edit_resource', resource_id=resource.id) }}"
+                    class="edit-btn"
+                >
+                    ✏️ تعديل
+                </a>
+
+                <a
+                    href="{{ url_for('delete_resource', resource_id=resource.id) }}"
+                    class="delete-btn"
+                    onclick="return confirm('هل أنت متأكد من حذف هذا المورد؟');"
+                >
+                    🗑️ حذف
+                </a>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>
+                لا توجد موارد مضافة حاليًا.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- العودة إلى لوحة الإدارة -->
+
+    <a
+        href="{{ url_for('admin') }}"
+        class="back-btn"
+    >
+        ← العودة إلى لوحة الإدارة
+    </a>
+
+</div>
+
+
+<!-- =========================================
+     JavaScript
+     ========================================= -->
+
+<script>
+
+const courseSearchInput = document.getElementById('course_search');
+const courseSelect = document.getElementById('course_id');
+const noCoursesFound = document.getElementById('no-courses-found');
+
+courseSearchInput.addEventListener('input', function () {
+
+    const searchText = this.value.trim().toLowerCase();
+
+    const options = courseSelect.querySelectorAll('option');
+
+    let visibleCourses = 0;
+
+    options.forEach(function (option) {
+
+        // نخلي خيار "اختر المساق" ظاهر دائمًا
+        if (option.value === '') {
+            option.style.display = '';
+            return;
+        }
+
+        const courseText =
+            option.getAttribute('data-course-search').toLowerCase();
+
+        if (courseText.includes(searchText)) {
+
+            option.style.display = '';
+            visibleCourses++;
+
+        } else {
+
+            option.style.display = 'none';
+
+        }
+
+    });
+
+
+    if (searchText !== '' && visibleCourses === 0) {
+
+        noCoursesFound.style.display = 'block';
+
+    } else {
+
+        noCoursesFound.style.display = 'none';
+
+    }
+
+});
+
+</script>
+
+
+</body>
+</html>
